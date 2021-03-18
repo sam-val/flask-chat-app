@@ -18,3 +18,4 @@ login_manager.login_view = 'login'
 
 
 from chat import routes
+from chat import sockets
