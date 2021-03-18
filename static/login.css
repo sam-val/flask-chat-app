@@ -1,0 +1,85 @@
+*, *::after, *::before {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.main {
+    text-align: center;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+}
+th {
+    font-weight: bold;
+    background-color: orange;
+    color: navy;
+    padding-bottom: 30px;
+    font-size: larger;
+}
+
+td {
+    min-width: 150px;
+    padding: 10px;
+    border-style: none;
+    /* height: 500px; */
+}
+h3 {
+    font-weight: bolder;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+table tr {
+    background-color: grey;
+    color: rgb(220,220,220);
+}
+table tr:nth-child(odd) {
+    background-color: darkgray;
+    color: rgb(40,40,40); 
+}
+table {
+    border-collapse: collapse;
+}
+
+a {
+    font-family: monospace;
+    font-size: 1em;
+    color: green;
+}
+
+table a {
+    color: rgb(40,40,40);
+}
+
+.bar {
+    /* font-weight: 2em; */
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+form {
+    margin: 20px;
+}
+
+.signup {
+    display: grid;
+    grid-template-columns: repeat(2, 400px);
+    grid-template-rows: 50px repeat(5, 30px);
+}
+
+.login {
+    display: grid;
+    grid-template-columns: 400px 400px;
+    grid-template-rows: 50px repeat(4, 30px);
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.form div {
+    padding: 10px;
+}

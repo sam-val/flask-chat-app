@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if title %}
+    <title> {{ title }}</title>
+    {% else %}
+    <title>No title</title>
+    {% endif %}
+
+    {% block head %}
+    <link rel="stylesheet" href=" {{ url_for('static', filename='base.css') }}">
+    {% endblock %}
+</head>
+<body>
+    <div class="bar">
+        <span>
+            <a href=" {{ url_for('index') }}">Index Page</a>
+        </span>
+        {% if current_user.is_anonymous %}
+        <span>
+            <a href=" {{ url_for('login') }}">Login</a>
+        </span>
+        <span>
+            <a href=" {{ url_for('signup') }}">Sign Up</a>
+        </span>
+        {% else %}
+        <span>
+            <a href=" {{ url_for('logout') }}">Logout</a>
+        </span>
+        <p>
+          hi, <b> {{ current_user.username }} </b>
+        </p>
+        {% endif %}
+    </div>
+
+    <ul>
+    {% for message in get_flashed_messages() %}
+    <li>
+        {{ message }}
+    </li>
+    {% endfor %}
+
+    </ul>
+
+    <hr>
+
+    <div class="wrapper">
+        <div class="main">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+    
+</body>
+</html>

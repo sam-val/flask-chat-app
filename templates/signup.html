@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<link rel="stylesheet" href=" {{ url_for('static', filename='login.css') }}">
+
+{% endblock %}
+
+{% block content %}
+    <form action="" method="POST" class="signup form">
+
+        <h2 style="grid-column-end: span 2">Sign Up</h2>
+
+        {{ form.hidden_tag() }}
+
+        <div class="label text-right">
+        {{ form.username.label }}:
+        </div>
+
+        <div class="text-left">
+        {{ form.username(size=15) }}
+        </div>
+
+        <div class="label text-right">
+        {{ form.email.label }}:
+        </div>
+        <div class="text-left">
+        {{ form.email(size=15) }}
+        </div>
+
+        <div class="label text-right">
+        {{ form.password.label }}:
+        </div>
+        <div class="text-left">
+        {{ form.password(size=15) }}
+        </div>
+
+        <div class="label text-right">
+        {{ form.re_password.label }}:
+        </div>
+        <div class=text-left>
+        {{ form.re_password(size=15) }}
+        </div>
+        <div class="text-left" style="grid-column-start:2"> {{ form.submit() }}</div>
+    </form>
+{% endblock %}
