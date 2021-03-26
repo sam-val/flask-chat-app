@@ -6,26 +6,31 @@
 
 {% endblock %}
 {% block content %}
-    <form action="" method="POST" class="login form">
-        <h2 style="grid-column-end: span 2">Log In</h2>
-        {{ form.hidden_tag() }}
+    <div class="wrapper">
+        <div class="main">
+            <form action="" method="POST" class="login form">
+                <h2 style="grid-column-end: span 2">Log In</h2>
+                {{ form.hidden_tag() }}
 
-        <div class="label text-right">
-        {{ form.username.label }}:
-        </div>
+                <div class="label text-right">
+                {{ form.username.label }}:
+                </div>
 
-        <div class="text-left">
-        {{ form.username(size=15) }}
-        </div>
+                <div class="text-left">
+                {{ form.username(size=15) }}
+                </div>
 
-        <div class="label text-right">
-        {{ form.password.label }}:
-        </div>
+                <div class="label text-right">
+                {{ form.password.label }}:
+                </div>
 
-        <div class="text-left">
-        {{ form.password(size=15) }}
+                <div class="text-left">
+                {{ form.password(size=15) }}
+                </div>
+                <div class="loginRemember text-left" style="grid-column-start: 2;"> {{ form.remember_me() }} {{ form.remember_me.label }}</div>
+                <div class="loginSubmit text-left" style="grid-column-start: 2;" > {{ form.submit() }}</div>
+            </form>
+
         </div>
-        <div class="loginRemember text-left" style="grid-column-start: 2;"> {{ form.remember_me() }} {{ form.remember_me.label }}</div>
-        <div class="loginSubmit text-left" style="grid-column-start: 2;" > {{ form.submit() }}</div>
-    </form>
+    </div>
 {% endblock %}

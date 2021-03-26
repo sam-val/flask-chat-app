@@ -7,40 +7,44 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="POST" class="signup form">
+    <div class="wrapper">
+        <div class="main">
+            <form action="" method="POST" class="signup form">
 
-        <h2 style="grid-column-end: span 2">Sign Up</h2>
+                <h2 style="grid-column-end: span 2">Sign Up</h2>
 
-        {{ form.hidden_tag() }}
+                {{ form.hidden_tag() }}
 
-        <div class="label text-right">
-        {{ form.username.label }}:
-        </div>
+                <div class="label text-right">
+                {{ form.username.label }}:
+                </div>
 
-        <div class="text-left">
-        {{ form.username(size=15) }}
-        </div>
+                <div class="text-left">
+                {{ form.username(size=15) }}
+                </div>
 
-        <div class="label text-right">
-        {{ form.email.label }}:
-        </div>
-        <div class="text-left">
-        {{ form.email(size=15) }}
-        </div>
+                <div class="label text-right">
+                {{ form.email.label }}:
+                </div>
+                <div class="text-left">
+                {{ form.email(size=15) }}
+                </div>
 
-        <div class="label text-right">
-        {{ form.password.label }}:
-        </div>
-        <div class="text-left">
-        {{ form.password(size=15) }}
-        </div>
+                <div class="label text-right">
+                {{ form.password.label }}:
+                </div>
+                <div class="text-left">
+                {{ form.password(size=15) }}
+                </div>
 
-        <div class="label text-right">
-        {{ form.re_password.label }}:
+                <div class="label text-right">
+                {{ form.re_password.label }}:
+                </div>
+                <div class=text-left>
+                {{ form.re_password(size=15) }}
+                </div>
+                <div class="text-left" style="grid-column-start:2"> {{ form.submit() }}</div>
+            </form>
         </div>
-        <div class=text-left>
-        {{ form.re_password(size=15) }}
-        </div>
-        <div class="text-left" style="grid-column-start:2"> {{ form.submit() }}</div>
-    </form>
+    </div>
 {% endblock %}

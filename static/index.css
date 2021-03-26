@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+
+.main-grid {
+    display: grid;
+    width: 700px;
+    height: 600px;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 2.5fr 1fr;
+
+}
+
+.scrollable {
+    overflow-y: auto;
+}
+
+.room-bar {
+    grid-row: span 2;
+    background-color: blue;
+    display: flex;
+    flex-direction: column;
+}
+
+.rooms {
+    height: 100%;
+}
+
+.chat-bar {
+    padding: 5px;
+    background-color: green;
+}
+
+.chat-bar .content {
+    display: inline-block;
+    width: 500px;
+    max-height: 450px;
+}
+
+.text-line {
+    width: 100%;
+    padding: 10px;
+    word-wrap: break-word;
+}
+.text-bar {
+    background-color: red;
+    display: flex;
+}
+
+.room {
+    margin: 5px;
+    height: 75px;
+    background-color: orange;
+}
+
+.room-bar .add-room-div {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+}
+
+.text-enter {
+    font-size: large;
+    width: 100%;
+    height: ;
+    background: black;
+    border-width: 2px;
+    border-radius: 2px;
+    border-color: pink;
+    color: pink;
+    caret-color: white;
+
+    outline: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}

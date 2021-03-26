@@ -41,11 +41,6 @@ table {
     border-collapse: collapse;
 }
 
-a {
-    font-family: monospace;
-    font-size: 1em;
-    color: green;
-}
 
 table a {
     color: rgb(40,40,40);
