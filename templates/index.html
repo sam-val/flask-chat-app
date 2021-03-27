@@ -5,6 +5,7 @@
 <link rel="stylesheet" href=" {{ url_for('static', filename='index.css') }}">
 
 {% endblock %}
+
 {% block content %}
 
     <div class="wrapper">
@@ -20,33 +21,13 @@
                 </div>
             </div>
             <div class="chat-bar">
-                <div class="content scrollable">
-                    <div class="text-line">hellosdfjlskdjflskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
-                    <div class="text-line">hello</div>
+                <div id="chat_history_display" class="content scrollable">
                 </div>
             </div>
 
             <div class="text-bar">
-                <textarea class="text-enter">10000000000000000000000000000000000000000000000000000000000000000000000000000</textarea>
-                <button type="button" class="btn btn-primary">Enter</div>
+                <textarea id="text-message" class="text-enter">10000000000000000000000000000000000000000000000000000000000000000000000000000</textarea>
+                <button id="btn-send" type="button" class="btn btn-primary">Enter</div>
             </div>
             
         </div>

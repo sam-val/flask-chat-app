@@ -1,6 +1,25 @@
 
-a {
+*, *::after, *::before {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.my-nav {
+    font-weight: 2em;
+    padding: 10px;
+}
+
+.my-nav a {
     font-family: monospace;
-    font-size: 1em;
     color: green;
 }
+
+.my-nav > span:after {
+    padding: 6px;
+    content: ' |';
+}
+
+.my-nav > span:last-of-type:after {
+    content: '';
+}
+

@@ -37,7 +37,7 @@
     max-height: 450px;
 }
 
-.text-line {
+.content > div {
     width: 100%;
     padding: 10px;
     word-wrap: break-word;
