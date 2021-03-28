@@ -25,3 +25,6 @@ class SignupForm(FlaskForm):
         if email.data.strip() != "":
             if User.query.filter_by(email=email.data).first():
                 raise ValidationError("Email exists")
+
+class MessageForm(FlaskForm):
+    pass
