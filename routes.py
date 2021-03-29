@@ -15,9 +15,11 @@ def logout():
 @app.route('/index', methods=['POST', 'GET'])
 @login_required
 def index():
+    user = User.query.filter_by(username=current_user.username).first()
+    rooms = user.rooms
+    room_names = [room.name for room in rooms]
     title = "Index"
-    return render_template('index.html')
-
+    return render_template('index.html', rooms=rooms)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
