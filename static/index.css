@@ -53,10 +53,15 @@
     background-color: orange;
 }
 
-.room-bar .add-room-div {
+.room-bar .command {
     display: flex;
     justify-content: center;
-    margin: 10px;
+    margin: 5px;
+}
+
+.command > button{
+    width: 130px;
+    height: 45px;
 }
 
 .text-enter {

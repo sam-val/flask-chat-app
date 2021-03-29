@@ -21,8 +21,10 @@ def message(data):
 
 @socketio.on('message_created')
 def message_created(data):
+
     message = data['text']
-    m = Message(room_id=None, user_id=None, content=data['text'])
+    user = User.query.filter_by(username=data['username']).first()
+    m = Message(room_id=data['room_id'], user_id=user.id, content=data['text'])
 
     db.session.add(m)
     db.session.commit()
@@ -54,6 +56,17 @@ def generate_room(data):
     socketio.emit('room_created_sucessfully', {'room_id':room.id, 
                                                 'room_name':room.name,
                                                 'message': message.content})
+
+@socketio.on('request_messages')
+def re_messages(data):
+    messages = Message.query.filter_by(room_id=data).order_by(Message.time_stamp).limit(10).all()
+    json = []
+    for message in messages:
+        content = message.content
+        username = message.user.username;
+        json.append({'content':content, 'username': username})
+    
+    socketio.emit('messages_requested', json)
 
 @socketio.on('join')
 def on_join(data):

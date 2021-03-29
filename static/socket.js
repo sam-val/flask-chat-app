@@ -4,35 +4,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn_create_room = document.querySelector('#create_room')
     const rooms_display = document.querySelector('#rooms_display')
     var text_area = document.querySelector('#text-message')
- 
+    
+    var current_room = rooms_display.children.length > 0 ? rooms_display.children[0] : null;
 
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     // add functionality to rooms:
-    rooms_display.children.forEach( ()=> {
-        console.log("hello")
-    })
-    rooms_display.children.forEach( () =>{
-        console.log('working');
-        // var room_id = div.getAttribute('data-id')
-        // let delete_btn = div.getElementsByTagName("BUTTON")
-        // div.addEventListener('click', () => {
-        //     console.log(this)
-        //     console.log(`you click a room `)
-        //     if (current_room !== div) {
-        //         socket.emit('request_messages', room_id)
-        //     }
-        // })
+    for (let i = 0; i < rooms_display.children.length; i++) {
+        let div = rooms_display.children[i]
+        let room_id = div.getAttribute('data-id')
+        let delete_btn = div.getElementsByTagName("BUTTON")[0]
+        div.addEventListener('click', () => {
+            join_room(div, room_id)
+        })
 
-        // delete_btn.addEventListener('click', () => {
+        delete_btn.addEventListener('click', () => {
 
-        // }) 
-
-    })
+        }) 
+        
+    }
     
     socket.on("messages_requested", data => {
         chat_display.innerHTML = ""
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < data.length; i++) {
             let user = data[i].username
             let content = data[i].content
             print_message(user,content, backwards=true)
@@ -63,9 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
       })
 
     btn_enter.addEventListener('click', ()=> {
-        let current_text = text_area.value.trim();
-
-        socket.emit('message_created', {text: current_text}); 
+        if (current_room != null ) {
+            let current_text = text_area.value.trim();
+            let room_id = current_room.getAttribute("data-id")
+            socket.emit('message_created', {username: username, room_id: room_id, text: current_text}); 
+        }
     })
 
     btn_create_room.addEventListener('click', () => {
@@ -76,7 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
 
-    function send_message() {
+    function join_room(div, room_id) {
+        if (current_room !== div) {
+            socket.emit('request_messages', room_id)
+            current_room = div
+            console.log("you're in room " + div.innerText)
+        }
+        else {
+            console.log("you're already in it")
+        }
 
     }
 
@@ -84,7 +88,18 @@ document.addEventListener('DOMContentLoaded', () => {
         var room_div = document.createElement('div')
         room_div.classList.add('room');
         room_div.innerHTML = name;
-        room_div.setAttribute('data-room-id', id);
+        room_div.setAttribute('data-id', id);
+        room_div.addEventListener('click', function () {
+            join_room(this, id);
+        })            
+
+        // add button
+        var btn = document.createElement('button');
+        btn.innerHTML="Delete Room";
+        btn.classList.add('btn', 'btn-danger');
+
+        room_div.appendChild(btn)
+
         rooms_display.appendChild(room_div);
     }
 

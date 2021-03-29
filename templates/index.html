@@ -13,18 +13,18 @@
     <div class="wrapper">
         <div class="main-grid">
             <div class="room-bar">
-                <div class="add-room-div">
+                <div class="command">
                     <button id="create_room" type="button" class="btn btn-success">Create Room</button>
                 </div>
-                <div class="join-room-div">
+                <div class="command">
                     <button id="btn_join_room" type="button" class="btn btn-success">Join Room</button>
                 </div>
-
+                
                 <div id="rooms_display" class="rooms scrollable">
                     {% for room in rooms %}
-                    
+
                     <div class="room" data-id="{{ room.id }}">{{ room.name }}
-                        <button type="button" class="btn btn-warning">Delete Room</button>
+                        <button type="button" class="btn btn-danger">Leave Room</button>
                     </div>
 
                     {% endfor %}
