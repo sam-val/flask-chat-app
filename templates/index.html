@@ -23,7 +23,10 @@
                 <div id="rooms_display" class="rooms scrollable">
                     {% for room in rooms %}
 
-                    <div class="room" data-id="{{ room.id }}">{{ room.name }}
+                    <div class="room" data-id="{{ room.id }}">
+                        <span>
+                            {{ room.name }}
+                        </span>
                         <button type="button" class="btn btn-danger">Leave Room</button>
                     </div>
 

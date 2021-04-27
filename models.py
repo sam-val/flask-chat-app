@@ -15,7 +15,7 @@ class User(UserMixin, db.Model):
     hash_password = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(80), unique=True, index=True)
     # tasks = db.relationship('Task', backref='user', lazy='dynamic')
-    rooms = db.relationship('Room', secondary=userroom, lazy='subquery')
+    rooms = db.relationship('Room', secondary=userroom, lazy='subquery', backref="users")
     messages = db.relationship('Message', backref="user", lazy='dynamic')
 
     def __repr__(self):
@@ -31,6 +31,8 @@ class User(UserMixin, db.Model):
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
+
+    messages = db.relationship("Message", backref="room", lazy="dynamic")
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
