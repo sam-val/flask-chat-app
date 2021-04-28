@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         data = JSON.parse(json);
 
+        let before_length = chat_display.children.length;
+
         if (data['mes'].length < 1) {
             return;
         }
@@ -105,11 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        let after_length = chat_display.children.length;
 
         if (scrollToBot) {
             scrollToBottom();
         } else {
-           // maintain where the scroll is percentage wise 
+           // maintain where the scroll is percentage wise
+           console.log(before_length, after_length) 
+           scrollToPercent((after_length - before_length)/after_length);
 
         }
     })
@@ -126,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
       })
 
       socket.on('message_created_sucessfully', data => {
-            print_message(username, data, backwards=true)
+            print_message(username, data)
             text_area.value = '';
             scrollToBottom();
       })
@@ -260,8 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
         chat_display.scrollTo(0, chat_display.scrollHeight);
     }
 
-    function srollToPercent(p) {
-        chat_display.scrollTo(0, chat_display.scrollHeight);
+    function scrollToPercent(p) {
+        chat_display.scrollTo(0, chat_display.scrollHeight*p);
     }
     // bind enter button:
     text_area.addEventListener('keypress', function(e) {
