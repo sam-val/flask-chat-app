@@ -11,11 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     if (current_room !== null) {
-        socket.emit('request_messages', {room_id:current_room.getAttribute('data-id')})
+        request_messages(current_room.getAttribute('data-id'))
         current_room.style.backgroundColor = "orange"
     }
 
-    // add functionality to rooms:
+
+    // loading and adding gui functionality to rooms:
     for (let i = 0; i < rooms_display.children.length; i++) {
         let div = rooms_display.children[i]
         let room_id = div.getAttribute('data-id')
@@ -25,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 join_room(div, room_id)
             }
         })
-
         delete_btn.addEventListener('click', function(e) {
             if (e.target === this) {
                 console.log(room_id)
@@ -40,8 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         var room_div = rooms_display.querySelector(`div[data-id="${data['room_id']}"]`)
         if (current_room === room_div) {
             // current_room = rooms_display.children.length > 0 ? rooms_display.children[0] : null;
-            if (rooms_display.children.length > 1) {
-                join_room(rooms_display.children[0], room_div.getAttribute('data-id'))
+            if (rooms_display.children.length > 0) {
+                let destination_room = rooms_display.children[0]
+                join_room(destination_room, destination_room.getAttribute('data-id'))
             } else {
                 current_room = null;
                 chat_display.innerHTML = "";
@@ -76,14 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     })
-    socket.on("messages_requested", data => {
-        chat_display.innerHTML = ""
-        for (let i = 0; i < data.length; i++) {
-            let user = data[i].username
-            let content = data[i].content
-            print_message(user,content, backwards=true)
-        }
+
+    socket.on("messages_requested", function(json) {
         
+        data = JSON.parse(json);
+
+        if (data['mes'].length < 1) {
+            return;
+        }
+
+        let concat = data['concat']
+        let scrollToBot = false;
+
+        if (!concat) {
+            chat_display.innerHTML = "";
+            scrollToBot = true;
+            for (let i = data['mes'].length - 1; i >= 0; i--) {
+                let user = data['mes'][i].username
+                let content = data['mes'][i].content
+                print_message(user,content, ontop=false)
+            }
+        } else {
+            for (let i = 0; i < data['mes'].length; i++) {
+                let user = data['mes'][i].username
+                let content = data['mes'][i].content
+                print_message(user,content, ontop=true)
+            }
+        }
+
+
+        if (scrollToBot) {
+            scrollToBottom();
+        } else {
+           // maintain where the scroll is percentage wise 
+
+        }
     })
 
       socket.on('connect', () => {
@@ -98,8 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
       })
 
       socket.on('message_created_sucessfully', data => {
-            print_message(username, data)
+            print_message(username, data, backwards=true)
             text_area.value = '';
+            scrollToBottom();
       })
 
       socket.on('room_created_sucessfully', data => {
@@ -107,12 +136,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
       })
 
-    btn_enter.addEventListener('click', ()=> {
-        if (current_room != null ) {
-            let current_text = text_area.value.trim();
-            let room_id = current_room.getAttribute("data-id")
-            socket.emit('message_created', {username: username, room_id: room_id, text: current_text}); 
+    // add events to elements:
+      // scrolling up and add old messages:
+    let lastKnownScrollPos = -1;
+    let ticking = false;
+    chat_display.addEventListener('scroll', function() {
+        lastKnownScrollPos = this.scrollTop;
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                if (lastKnownScrollPos === 0) {
+                    request_messages(current_room.getAttribute('data-id'), offset=chat_display.children.length, limit=10, concat=true) 
+                }
+                ticking = false;
+            })
+            ticking = true;
         }
+    })
+
+    btn_enter.addEventListener('click', function() {
+        post_message();
     })
 
     btn_join_room.addEventListener('click', () => {
@@ -130,6 +172,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
+    function request_messages(room_id, offset=0, limit=10, concat=false) {
+        socket.emit('request_messages', {room_id: room_id, offset: offset, limit: limit, concat: concat})
+    }
+
+    function post_message() {
+        if (current_room != null ) {
+            if (text_area.value.trim() !== "" ) {
+                let current_text = text_area.value.trim();
+                let room_id = current_room.getAttribute("data-id")
+                socket.emit('message_created', {username: username, room_id: room_id, text: current_text}); 
+            }
+        }
+    }
+
     function leave_room(btn, room_id) {
         socket.emit('leave_room', {room_id: room_id, username: username})
 
@@ -138,14 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function join_room(div, room_id) {
         if (current_room !== div) {
-            socket.emit('request_messages', {room_id: room_id});
+            request_messages(room_id)
             if (current_room) {
                 current_room.style.backgroundColor = "grey"
             }
             current_room = div
             current_room.style.backgroundColor = "orange"
             var s = current_room.getElementsByTagName("SPAN")[0]
-            console.log("you're in room " + s.innerHTML.trim())
+            // console.log("you're in room " + s.innerHTML.trim())
         }
         else {
             console.log("you're already in it")
@@ -175,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         btn.addEventListener('click', function (e) {
             if (e.target == this) {
-                console.log("i'm called")
                 leave_room(this, id);
             }
         })
@@ -190,10 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         join_room(room_div, room_div.getAttribute('data-id'))
     }
 
-    function print_message(user , m, backwards=false) {
+    function print_message(user , m, ontop=false) {
         var new_message_div = document.createElement('div');
         new_message_div.innerHTML = `<b>${user}</b>: ${m}`
-        if (backwards) {
+        if (ontop) {
             chat_display.insertBefore(new_message_div, chat_display.firstChild)
         }
         else {
@@ -201,5 +256,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function scrollToBottom () {
+        chat_display.scrollTo(0, chat_display.scrollHeight);
+    }
+
+    function srollToPercent(p) {
+        chat_display.scrollTo(0, chat_display.scrollHeight);
+    }
+    // bind enter button:
+    text_area.addEventListener('keypress', function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+        }
+    })
+    text_area.addEventListener('keyup', function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            btn_enter.click();
+        }
+    })
 
 })

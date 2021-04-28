@@ -103,17 +103,28 @@ def enter_room(data):
 
 @socketio.on('request_messages')
 def re_messages(data):
-    n = 10
+    limit = data['limit']
+    offset = data['offset']
     room_id = int(data['room_id'])
-    
-    messages = Message.query.filter_by(room_id=room_id).order_by(Message.time_stamp).limit(n).all()
-    json = []
+
+    messages = Message.query.\
+        filter_by(room_id=room_id).\
+        order_by(Message.time_stamp.desc()).\
+        offset(offset).\
+        limit(limit).\
+        all()
+
+    print(f'offset: {offset}, limit: {limit}, messages are: {messages}')
+
+    json_data = {'concat': data['concat'], 'mes': [] }
+
     for message in messages:
         content = message.content
         username = message.user.username;
-        json.append({'content':content, 'username': username})
+        json_data['mes'].append({'content':content, 'username': username})
     
-    socketio.emit('messages_requested', json)
+    # print(json_data['mes'], file=sys.stderr)
+    socketio.emit('messages_requested', json.dumps(json_data))
 
 
 @socketio.on('join')

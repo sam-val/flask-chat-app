@@ -34,7 +34,7 @@
 .chat-bar .content {
     display: inline-block;
     width: 500px;
-    max-height: 450px;
+    max-height: 420px;
 }
 
 .content > div {
