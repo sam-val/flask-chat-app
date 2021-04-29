@@ -1,5 +1,6 @@
 from chat import socketio, db
 from flask_socketio import join_room, leave_room
+from flask import request, session
 import sys
 import json
 from chat.models import User, Room, Message
@@ -21,15 +22,17 @@ def message(data):
 
 @socketio.on('message_created')
 def message_created(data):
+    room_code = data['room_id']
 
     message = data['text']
     user = User.query.filter_by(username=data['username']).first()
-    m = Message(room_id=data['room_id'], user_id=user.id, content=data['text'])
+    m = Message(room_id=room_code, user_id=user.id, content=data['text'])
 
     db.session.add(m)
     db.session.commit()
 
-    socketio.emit('message_created_sucessfully', data['text'])
+
+    socketio.emit('message_created', { 'username': data['username'], 'text': data['text'] }, to=room_code)
 
 @socketio.on('load_history')
 def load_history(room_id):
@@ -45,31 +48,42 @@ def generate_room(data):
 
     db.session.commit()
 
-    message = Message(user_id=user.id,room_id=room.id,content=f"{user.username} just created room <b>{room.name}</b>")
+    message = Message(user_id=user.id,room_id=room.id,content=f"{user.username} just created room <b>{room.id}</b>")
 
     db.session.add(message)
 
     db.session.commit()
 
-    socketio.emit('room_created_sucessfully', {'room_id':room.id, 
-                                                'room_name':room.name
-                                                })
+    socketio.emit('room_created_sucessfully', {'room_id': room.id, \
+                                                'room_name':room.name \
+                                                }, to=request.sid)
 
+    join_room(room.id)
                                         
 
 
 @socketio.on('leave_room')
-def leave_room(data):
+def escape_room(data):
     user = User.query.filter_by(username=data['username']).first()
     # user = User.query.filter_by(username=current_user.username).first()
     room = Room.query.filter_by(id=data['room_id']).first()
-    print(f'before: {room.users}', file=sys.stderr)
+    # print(f'before: {room.users}', file=sys.stderr)
+    message = None
+
     for u in room.users:
         print(f'{u}', file=sys.stderr)
         if u.id == user.id:
             room.users.remove(u)
 
-    print(f'after: {room.users}', file=sys.stderr)
+            message = Message(user_id=user.id,room_id=room.id,content=f" just left chat.")
+
+            db.session.add(message)
+
+            db.session.commit()
+
+            break
+    else:
+        return
 
     if len(room.users) <= 0:
         for m in room.messages:
@@ -78,9 +92,12 @@ def leave_room(data):
         db.session.delete(room)
 
     db.session.commit()
+    
+    print(f'after: {room.users}', file=sys.stderr)
+
+    socketio.emit("leave_room_success", {'room_id': data['room_id'], 'username': data['username'], 'message': message.content }, to=data['room_id'])
 
 
-    socketio.emit("leave_room_success", {'room_id': data['room_id']})
 
 @socketio.on('enter_room')
 def enter_room(data):
@@ -93,11 +110,26 @@ def enter_room(data):
         return
 
     room_name = room.name
+    message = None
 
-    user.rooms.append(room)
+    if room not in user.rooms:
+        user.rooms.append(room)
+        db.session.commit()
+
+        message = Message(user_id=user.id,room_id=room.id,content=f" just joined chat.")
+
+        db.session.add(message)
+
+        db.session.commit()
+
+    else:
+        print(f"user's aldready in room", file=sys.stderr)
 
 
-    socketio.emit('enter_room_success', {'room_id': room_id, 'room_name': room_name})
+
+    socketio.emit('enter_room_success', {'room_id': room.id, 'room_name': room_name, 'username': data['username'], \
+
+                                        'message': message.content}, room=data['room_id'])
 
 
 
@@ -124,12 +156,19 @@ def re_messages(data):
         json_data['mes'].append({'content':content, 'username': username})
     
     # print(json_data['mes'], file=sys.stderr)
-    socketio.emit('messages_requested', json.dumps(json_data))
+    socketio.emit('messages_requested', json.dumps(json_data), to=request.sid)
 
 
 @socketio.on('join')
 def on_join(data):
     username = data['username']
     room = data['room_id']
-    join_room(room)
-    
+    print(f'{username} joined room {room}', file=sys.stderr)
+    join_room(room, sid=request.sid)
+
+@socketio.on('leave')
+def on_leave(data):
+    username = data['username']
+    room = data['room_id']
+    print(f'{username} left room {room}')
+    leave_room(room, sid=request.sid)

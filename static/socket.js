@@ -15,34 +15,55 @@ document.addEventListener('DOMContentLoaded', () => {
         current_room.style.backgroundColor = "orange"
     }
 
+    socket.on('connect', data => {
+        console.log("connected")
+        // loading and adding gui functionality to rooms:
+        for (let i = 0; i < rooms_display.children.length; i++) {
+            let div = rooms_display.children[i]
+            let room_id = div.getAttribute('data-id')
+            let delete_btn = div.getElementsByTagName("BUTTON")[0]
 
-    // loading and adding gui functionality to rooms:
-    for (let i = 0; i < rooms_display.children.length; i++) {
-        let div = rooms_display.children[i]
-        let room_id = div.getAttribute('data-id')
-        let delete_btn = div.getElementsByTagName("BUTTON")[0]
-        div.addEventListener('click', function (e) {
-            if (e.target === this) {
-                join_room(div, room_id)
-            }
-        })
-        delete_btn.addEventListener('click', function(e) {
-            if (e.target === this) {
-                console.log(room_id)
+            socket.emit('join', {'username': username, 'room_id': room_id });
 
-                leave_room(this, room_id)
-            }
-        })
-        
-    }
+            // join room by clicking:
+            div.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    join_room(this, room_id, forced_refresh=true)
+                }
+            })
+            delete_btn.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    leave_room(this, room_id)
+                }
+            })
+            
+        }
+    }) 
+
 
     socket.on("leave_room_success", data => {
+
+        console.log("leave room sucess")
+
+
+        if (data['username'] != username) {
+            print_message(data['username'], data['message'], ontop=false)
+            scrollToBottom();
+            return;
+        }
+
+        socket.emit('leave', {'username': username, 'room_id': data['room_id']})
+
         var room_div = rooms_display.querySelector(`div[data-id="${data['room_id']}"]`)
         if (current_room === room_div) {
             // current_room = rooms_display.children.length > 0 ? rooms_display.children[0] : null;
-            if (rooms_display.children.length > 0) {
+
+
+            if (rooms_display.children.length > 1) {
+                rooms_display.removeChild(room_div)
                 let destination_room = rooms_display.children[0]
                 join_room(destination_room, destination_room.getAttribute('data-id'))
+                return;
             } else {
                 current_room = null;
                 chat_display.innerHTML = "";
@@ -51,10 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rooms_display.removeChild(room_div)
 
+
     })
     
     socket.on("enter_room_success", data => {
         var room_exist = false
+
+        if (data['username'] !== username) {
+            print_message(data['username'], data['message'], ontop=false)
+            scrollToBottom();
+            return;
+        }
 
         for (let i = 0; i < rooms_display.children.length; i++) {
             let div = rooms_display.children[i]
@@ -67,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (room_exist) {
             var room_div = rooms_display.querySelector(`div[data-id="${data['room_id']}"]`)
-            join_room(room_div, data['room_id'])
+            join_room(room_div, data['room_id'], forced_refresh=true)
 
         } else {
 
@@ -130,15 +158,19 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log(`message received: ${data}`)
       })
 
-      socket.on('message_created_sucessfully', data => {
-            print_message(username, data)
-            text_area.value = '';
+    socket.on('message_created', function(data) {
+
+            print_message(data['username'], data['text'])
+
+            if (data['username'] == username) {
+                text_area.value = '';
+            }
+
             scrollToBottom();
       })
 
       socket.on('room_created_sucessfully', data => {
-            make_room(data['room_id'],data['room_name']);
-
+            make_room(data['room_id'], data['room_name']);
       })
 
     // add events to elements:
@@ -166,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var room_id = prompt("Enter the room ID: ")
         room_id = room_id.trim()
         if (room_id != null && room_id != "") {
+            socket.emit('join', {'username': username, 'room_id': room_id})
             socket.emit('enter_room', {room_id: room_id, username: username});
         }
     })
@@ -193,13 +226,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function leave_room(btn, room_id) {
         socket.emit('leave_room', {room_id: room_id, username: username})
-
     }
 
 
-    function join_room(div, room_id) {
+    function join_room(div, room_id, forced_refresh=false) {
         if (current_room !== div) {
             request_messages(room_id)
+            socket.emit('join', {'username': username, 'room_id': room_id })
             if (current_room) {
                 current_room.style.backgroundColor = "grey"
             }
@@ -210,6 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         else {
             console.log("you're already in it")
+            if (forced_refresh) {
+                request_messages(room_id)
+            }
         }
 
     }
@@ -220,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // add span for name:
         var s = document.createElement('span')
-        s.innerHTML = name;
+        s.innerHTML = name + "id: " + id;
         room_div.appendChild(s);
 
         room_div.setAttribute('data-id', id);
@@ -247,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rooms_display.appendChild(room_div);
 
         // switch current room
-        join_room(room_div, room_div.getAttribute('data-id'))
+        join_room(room_div, id)
     }
 
     function print_message(user , m, ontop=false) {

@@ -11,7 +11,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app=app, db=db)
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, logger=True)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
