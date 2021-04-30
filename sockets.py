@@ -20,7 +20,7 @@ def message(data):
     print(f'{data}', file=sys.stderr)
     socketio.send(data)
 
-@socketio.on('message_created')
+@socketio.on('posting_message')
 def message_created(data):
     room_code = data['room_id']
 
@@ -31,7 +31,8 @@ def message_created(data):
     db.session.add(m)
     db.session.commit()
 
-
+    rooms = socketio.server.rooms(request.sid)
+    print(rooms, file=sys.stderr)
     socketio.emit('message_created', { 'username': data['username'], 'text': data['text'] }, to=room_code)
 
 @socketio.on('load_history')
@@ -58,8 +59,6 @@ def generate_room(data):
                                                 'room_name':room.name \
                                                 }, to=request.sid)
 
-    join_room(room.id)
-                                        
 
 
 @socketio.on('leave_room')
@@ -95,7 +94,7 @@ def escape_room(data):
     
     print(f'after: {room.users}', file=sys.stderr)
 
-    socketio.emit("leave_room_success", {'room_id': data['room_id'], 'username': data['username'], 'message': message.content }, to=data['room_id'])
+    socketio.emit("leave_room_success", {'room_id': data['room_id'], 'username': data['username'], 'message': message.content }, room=str(data['room_id']))
 
 
 
@@ -125,11 +124,16 @@ def enter_room(data):
     else:
         print(f"user's aldready in room", file=sys.stderr)
 
+    
+    m = ""
 
+    if (message): 
+        m = message.content
+    
 
     socketio.emit('enter_room_success', {'room_id': room.id, 'room_name': room_name, 'username': data['username'], \
 
-                                        'message': message.content}, room=data['room_id'])
+                                        'message': m}, room=str(data['room_id']))
 
 
 
@@ -162,13 +166,13 @@ def re_messages(data):
 @socketio.on('join')
 def on_join(data):
     username = data['username']
-    room = data['room_id']
+    room = str(data['room_id'])
     print(f'{username} joined room {room}', file=sys.stderr)
     join_room(room, sid=request.sid)
 
 @socketio.on('leave')
 def on_leave(data):
     username = data['username']
-    room = data['room_id']
+    room = str(data['room_id']) # have to turn it to a bloody string (otherwise a bug will surface)
     print(f'{username} left room {room}')
     leave_room(room, sid=request.sid)

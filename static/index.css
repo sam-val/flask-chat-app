@@ -48,11 +48,21 @@
 }
 
 .room {
+    display: flex;
+    flex-direction: column;
     margin: 5px;
+    margin-top: 25px;
     height: 75px;
     background-color: grey;
 }
 
+.room > span {
+    text-align: center;
+}
+
+.leave-button {
+    margin: 5px;
+}
 .room-bar .command {
     display: flex;
     justify-content: center;

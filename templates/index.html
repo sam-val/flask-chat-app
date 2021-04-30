@@ -25,10 +25,12 @@
 
                     <div class="room" data-id="{{ room.id }}">
                         <span>
-                            {{ room.name }}
+                            <b>{{ room.name }}</b>
+                        </span>
+                        <span>
                             id: {{ room.id }}
                         </span>
-                        <button type="button" class="btn btn-danger">Leave Room</button>
+                        <button type="button" class="btn btn-danger leave-button">Leave Room</button>
                     </div>
 
                     {% endfor %}

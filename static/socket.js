@@ -27,10 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // join room by clicking:
             div.addEventListener('click', function (e) {
-                if (e.target === this) {
-                    join_room(this, room_id, forced_refresh=true)
+                console.log(e.target.tagName)
+                if (e.target.tagName === "SPAN") {
+                    join_room(this, room_id, forced_refresh=true);
                 }
-            })
+            })            
+
             delete_btn.addEventListener('click', function(e) {
                 if (e.target === this) {
                     leave_room(this, room_id)
@@ -39,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
         }
     }) 
-
 
     socket.on("leave_room_success", data => {
 
@@ -57,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         var room_div = rooms_display.querySelector(`div[data-id="${data['room_id']}"]`)
         if (current_room === room_div) {
             // current_room = rooms_display.children.length > 0 ? rooms_display.children[0] : null;
-
 
             if (rooms_display.children.length > 1) {
                 rooms_display.removeChild(room_div)
@@ -167,9 +167,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             scrollToBottom();
-      })
+      });
 
       socket.on('room_created_sucessfully', data => {
+            console.log("receive room_created_sucess");
             make_room(data['room_id'], data['room_name']);
       })
 
@@ -182,7 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ticking) {
             window.requestAnimationFrame(function() {
                 if (lastKnownScrollPos === 0) {
-                    request_messages(current_room.getAttribute('data-id'), offset=chat_display.children.length, limit=10, concat=true) 
+                    if (current_room !== null ) {
+                        request_messages(current_room.getAttribute('data-id'), offset=chat_display.children.length, limit=10, concat=true) 
+                    }
                 }
                 ticking = false;
             })
@@ -192,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btn_enter.addEventListener('click', function() {
         post_message();
+        console.log(this);
     })
 
     btn_join_room.addEventListener('click', () => {
@@ -218,8 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (current_room != null ) {
             if (text_area.value.trim() !== "" ) {
                 let current_text = text_area.value.trim();
-                let room_id = current_room.getAttribute("data-id")
-                socket.emit('message_created', {username: username, room_id: room_id, text: current_text}); 
+                let room_id = current_room.getAttribute("data-id");
+                socket.emit('posting_message', {username: username, room_id: room_id, text: current_text}); 
             }
         }
     }
@@ -238,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             current_room = div
             current_room.style.backgroundColor = "orange"
-            var s = current_room.getElementsByTagName("SPAN")[0]
+            // var s = current_room.getElementsByTagName("SPAN")[0]
             // console.log("you're in room " + s.innerHTML.trim())
         }
         else {
@@ -256,18 +260,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // add span for name:
         var s = document.createElement('span')
-        s.innerHTML = name + "id: " + id;
+        s.innerHTML = "<b>" + name + "<b>";
         room_div.appendChild(s);
 
         room_div.setAttribute('data-id', id);
+
         room_div.addEventListener('click', function (e) {
-            if (e.target == this) {
-                join_room(this, id);
+            if (e.target.tagName === "SPAN") {
+                join_room(this, id, forced_refresh=true);
             }
         })            
 
+        // add span for id:
+        var s2 = document.createElement('span')
+        s2.innerHTML = `id: ${id}`; 
+        room_div.appendChild(s2);
+
         // add button
         var btn = document.createElement('button');
+        btn.classList.add("leave-button");
         btn.innerHTML="Leave Room";
         
         btn.addEventListener('click', function (e) {
